@@ -193,3 +193,4 @@ $RECYCLE.BIN/
 *.lnk
 
 # End of https://www.gitignore.io/api/emacs,vim,windows,osx,linux,ruby
+_artifacts

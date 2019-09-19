@@ -1,0 +1,7 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+require_relative('../lib/in')
+
+include AdGear::Infrastructure::JfrogCli::In
+
+InAction.new(ARGF.read)

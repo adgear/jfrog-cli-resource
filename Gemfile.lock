@@ -1,0 +1,21 @@
+PATH
+  remote: .
+  specs:
+    artifactory_resource (0.1.0)
+      mixlib-shellout (~> 3.0)
+      mixlib-versioning (~> 1.2)
+
+GEM
+  remote: https://rubygems.org/
+  specs:
+    mixlib-shellout (3.0.7)
+    mixlib-versioning (1.2.7)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  artifactory_resource!
+
+BUNDLED WITH
+   1.16.2

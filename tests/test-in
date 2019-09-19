@@ -1,0 +1,42 @@
+#!/usr/bin/env ruby
+require('mixlib/shellout')
+require('json')
+require('timeout')
+
+creds = ''
+
+begin
+  Timeout::timeout 5 do
+    creds = JSON.parse(ARGF.read, { symbolize_names: true, object_class: OpenStruct })
+  end
+rescue Timeout::Error
+  puts('Timed-out waiting for credentials on STDIN')
+  exit 1
+end
+
+stdin_payload = {
+  source: {
+    url: creds.data.url,
+    username: creds.data.username,
+    password: creds.data.password,
+    repository: 'libs-test-test',
+    path: 'com/adgear/data/',
+    artifact_name: 'some-sbt-package',
+    qualifier: 'distribution',
+    extension: '.tar.gz'
+  },
+  version: {
+    version: '1.5.1'
+  }
+}.to_h.to_json
+
+env = {
+  'LOG_LEVEL': ENV['LOG_LEVEL'] || 'DEBUG'
+}
+
+run_in = Mixlib::ShellOut.new('./assets/jfrog-cli-resource-in', input: stdin_payload, environment: env)
+run_in.run_command
+puts(run_in.stderr)
+run_in.error!
+
+puts(run_in.stdout)

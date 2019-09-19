@@ -1,0 +1,68 @@
+# instance:       concourse.int.adgear.com
+# pipeline_name:  jfrog-cli-resource
+# team:           common
+---
+resource_types:
+  - name: slack-notification
+    type: docker-image
+    source:
+      repository: cfcommunity/slack-notification-resource
+      tag: latest
+
+resources:
+  - name: jfrog-cli-resource-release
+    type: git
+    source:
+      private_key: ((adgear-concourse.ssh_private_key))
+      repository_name: adgear/jfrog-cli-resource
+      uri: git@github.com:adgear/jfrog-cli-resource.git
+      tag_filter: '*.*.*'
+  - name: common-tasks-repo
+    type: git
+    source:
+      uri: git@github.com:adgear/common-tasks.git
+      private_key: ((adgear-concourse.ssh_private_key))
+  - name: jfrog-cli-resource-image
+    type: docker-image
+    source:
+      repository: adgear-docker.jfrog.io/adgear/jfrog-cli-resource
+      username: ((artifactory.username))
+      password: ((artifactory.password))
+  - name: notify-slack
+    type: slack-notification
+    source:
+      url: ((slack-ci-cd-lab.url))
+
+jobs:
+  - name: build-image
+    plan:
+      - in_parallel:
+          fail_fast: true
+          steps:
+            - get: jfrog-cli-resource-release
+              trigger: true
+            - get: common-tasks-repo
+      - task: explode-tags
+        file: common-tasks-repo/explode-tags/latest/explode-tags.yml
+        input_mapping:
+          source: jfrog-cli-resource-release
+        params:
+          version_file: source/.git/ref
+      - in_parallel:
+          fail_fast: true
+          steps:
+            - put: jfrog-cli-resource-image
+              params:
+                build: jfrog-cli-resource-release
+                tag_as_latest: true
+                tag_file: tags/tags.bare
+                additional_tags: tags/tags.additional
+            - task: generate-pretty-message
+              file: common-tasks-repo/generate-pretty-message/latest/generate-pretty-message.yml
+              params:
+                TITLE: ":dumpster-fire: jfrog-cli-resource image v$TEXT_FILE_CONTENT was released"
+                COLOUR: "#2EB886" # Green
+      - put: notify-slack
+        params:
+          text_file: tags/tags.bare
+          attachments_file: slack-attachment/attachment.json

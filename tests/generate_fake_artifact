@@ -1,0 +1,21 @@
+#!/usr/bin/env ruby
+require('mixlib/shellout')
+require('fileutils')
+
+fake_file_name = 'garbage_text.txt'
+
+FileUtils.mkdir_p('_artifacts')
+File.write(
+  File.join('_artifacts', fake_file_name),
+  (0...10_000).map { ('a'..'z').to_a[rand(26)] }.join
+)
+
+compress_cmd = [
+  'tar', '-cvjf',
+  '_artifacts/some-sbt-package-distribution-1.2.1.tar.gz',
+  "_artifacts/#{fake_file_name}"
+].join(' ')
+
+compress = Mixlib::ShellOut.new(compress_cmd)
+compress.run_command
+compress.error!
