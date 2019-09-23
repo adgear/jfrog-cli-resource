@@ -16,34 +16,42 @@ module AdGear
         include AdGear::Infrastructure::JfrogCli::Util
 
         class OutAction
-          def initialize(data)
+          def initialize(data, argv = [])
             stdin = JSON.parse(data, symbolize_names: false)
-            ret = {
-              version: { version: stdin['version']['version'] },
-              metadata: [
-                { name: 'version', value: stdin['version']['version'] }
-              ]
-            }
 
-            resource_folder = ARGV[1] || Dir.pwd
-            Log.debug(resource_folder)
+            resource_folder = argv[0] || Dir.pwd
+            Log.debug("resource_folder: #{resource_folder}")
 
-            unless ENV.key?('source_folder')
+            unless stdin.dig('params', 'source_folder') || ENV.key?('source_folder')
               Log.fatal('The `source_folder` parameter must be specified') 
             end
 
-            source_file = File.join(
+            source_folder = stdin.dig('params', 'source_folder') || ENV['source_folder']
+
+            match_criteria = File.join(
               resource_folder,
-              ENV['source_folder'],
+              source_folder,
               stdin['source']['artifact_name'] + '-' +
               stdin['source']['qualifier'] + '-' +
-              stdin['version']['version'] +
+              '*' +
               stdin['source']['extension']
             )
 
-            ret[:metadata] << { name: 'file', value: File.basename(source_file) }
+            source_file = Dir.glob(match_criteria).first
+            Log.debug("source_file: #{source_file}")
 
-            Log.debug(source_file)
+            unless source_file
+              Log.fatal("No file found to match #{match_criteria}")
+            end
+
+            version = source_file.gsub(File.join(
+                resource_folder,
+                source_folder,
+                stdin['source']['artifact_name'] + '-' +
+                stdin['source']['qualifier'] + '-'), ''
+              ).gsub(stdin['source']['extension'], '')
+            Log.debug("version: #{version}")
+
             Log.debug(JSON.pretty_generate(stdin.to_h))
 
             workdir = Dir.mktmpdir(nil, '/tmp')
@@ -76,7 +84,7 @@ module AdGear
                 stdin['source']['repository'],
                 stdin['source']['path'],
                 stdin['source']['artifact_name'],
-                stdin['version']['version'],
+                version,
                 '/'
               )
               Log.debug(push_destination)
@@ -104,6 +112,14 @@ module AdGear
               FileUtils.rm_rf(workdir)
               Log.debug("Deleted #{workdir}")
             end
+
+            ret = {
+              version: { version: version },
+              metadata: [
+                { name: 'version', value: version },
+                { name: 'file', value: File.basename(source_file) }
+              ]
+            }
 
             puts(JSON.pretty_generate(ret))
           end

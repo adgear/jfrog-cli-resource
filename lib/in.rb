@@ -15,7 +15,7 @@ module AdGear
         include AdGear::Infrastructure::JfrogCli::Util
 
         class InAction
-          def initialize(data)
+          def initialize(data, argv = [])
             stdin = JSON.parse(data, symbolize_names: false)
             validate_stdin(stdin)
 
@@ -26,7 +26,7 @@ module AdGear
               ]
             }
 
-            download_location = ARGV[1] || Dir.pwd
+            download_location = argv[1] || Dir.pwd
 
             Log.debug(download_location)
             Log.debug(JSON.pretty_generate(stdin.to_h))

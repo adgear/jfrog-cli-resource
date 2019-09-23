@@ -4,4 +4,4 @@ require_relative('../lib/out')
 
 include AdGear::Infrastructure::JfrogCli::Out
 
-OutAction.new(ARGF.read)
+OutAction.new(STDIN.read, ARGV)

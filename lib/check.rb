@@ -21,7 +21,7 @@ module AdGear
 
             validate_stdin(stdin)
 
-            unless stdin['version'].key?('version')
+            unless stdin.dig('version', 'version')
               stdin['version'] = { 'version': '0.0.0' }
             end
 

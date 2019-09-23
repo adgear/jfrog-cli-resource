@@ -4,4 +4,4 @@ require_relative('../lib/check')
 
 include AdGear::Infrastructure::JfrogCli::Check
 
-CheckAction.new(ARGF.read)
+CheckAction.new(STDIN.read)

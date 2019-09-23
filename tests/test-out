@@ -7,7 +7,7 @@ creds = ''
 
 begin
   Timeout::timeout 5 do
-    creds = JSON.parse(ARGF.read, { symbolize_names: true, object_class: OpenStruct })
+    creds = JSON.parse(STDIN.read, { symbolize_names: true, object_class: OpenStruct })
   end
 rescue Timeout::Error
   puts('Timed-out waiting for credentials on STDIN')
@@ -25,18 +25,16 @@ stdin_payload = {
     qualifier: 'distribution',
     extension: '.tar.gz'
   },
-  version: {
-    version: '1.2.1'
+  params: {
+    source_folder: '_artifacts'
   }
 }.to_h.to_json
 
 env = {
-  'LOG_LEVEL': ENV['LOG_LEVEL'] || 'DEBUG',
-  ## Params below
-  'source_folder': '_artifacts'
+  'LOG_LEVEL': ENV['LOG_LEVEL'] || 'DEBUG'
 }
 
-run_out = Mixlib::ShellOut.new('./assets/jfrog-cli-resource-out', input: stdin_payload, environment: env)
+run_out = Mixlib::ShellOut.new("./assets/jfrog-cli-resource-out #{Dir.pwd}", input: stdin_payload, environment: env)
 run_out.run_command
 puts(run_out.stderr)
 run_out.error!

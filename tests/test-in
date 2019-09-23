@@ -7,7 +7,7 @@ creds = ''
 
 begin
   Timeout::timeout 5 do
-    creds = JSON.parse(ARGF.read, { symbolize_names: true, object_class: OpenStruct })
+    creds = JSON.parse(STDIN.read, { symbolize_names: true, object_class: OpenStruct })
   end
 rescue Timeout::Error
   puts('Timed-out waiting for credentials on STDIN')

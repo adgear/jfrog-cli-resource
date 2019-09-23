@@ -4,4 +4,4 @@ require_relative('../lib/in')
 
 include AdGear::Infrastructure::JfrogCli::In
 
-InAction.new(ARGF.read)
+InAction.new(STDIN.read, ARGV)
