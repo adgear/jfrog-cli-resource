@@ -24,10 +24,10 @@ stdin_payload = {
     artifact_name: 'some-sbt-package',
     qualifier: 'distribution',
     extension: '.tar.gz'
-  },
-  version: {
-    version: '1.2.1'
   }
+  # version: {
+  #   version: '1.2.1'
+  # }
 }.to_h.to_json
 
 env = {

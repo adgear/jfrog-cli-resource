@@ -8,11 +8,8 @@ module AdGear
         module_function
 
         def validate_stdin(stdin)
-          %W[
-            source
-            version
-          ].each do |k|
-            Log.fatal("Missing key '#{k}' in stdin") unless stdin.key?(k)
+          unless stdin.key?('source')
+            Log.fatal("Missing key 'source' in stdin")
           end
 
           %W[

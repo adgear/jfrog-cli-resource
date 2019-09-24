@@ -21,10 +21,6 @@ module AdGear
 
             validate_stdin(stdin)
 
-            unless stdin.dig('version', 'version')
-              stdin['version'] = { 'version': '0.0.0' }
-            end
-
             Log.debug(JSON.pretty_generate(stdin.to_h))
 
             workdir = Dir.mktmpdir(nil, '/tmp')
@@ -37,7 +33,7 @@ module AdGear
               'CI': 'true'
             }
 
-            oldest_version = Mixlib::Versioning.parse(stdin['version']['version'])
+            oldest_version = Mixlib::Versioning.parse(stdin.dig('version', 'version') || '0.0.0')
 
             begin
               Log.info('Priming configuration...')
