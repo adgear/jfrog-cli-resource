@@ -34,7 +34,7 @@ env = {
   'LOG_LEVEL': ENV['LOG_LEVEL'] || 'DEBUG'
 }
 
-run_in = Mixlib::ShellOut.new('./assets/jfrog-cli-resource-in', input: stdin_payload, environment: env)
+run_in = Mixlib::ShellOut.new('./assets/jfrog-cli-resource-in ' + ARGV.join(' '), input: stdin_payload, environment: env)
 run_in.run_command
 puts(run_in.stderr)
 run_in.error!

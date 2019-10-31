@@ -15,7 +15,7 @@ module AdGear
         include AdGear::Infrastructure::JfrogCli::Util
 
         class InAction
-          def initialize(data, argv = [])
+          def initialize(data)
             stdin = JSON.parse(data, symbolize_names: false)
             validate_stdin(stdin)
 
@@ -26,9 +26,9 @@ module AdGear
               ]
             }
 
-            download_location = argv[1] || Dir.pwd
+            download_location = ARGV[0] || Dir.pwd
 
-            Log.debug(download_location)
+            Log.debug("Using this folder as destination location: #{download_location}")
             Log.debug(JSON.pretty_generate(stdin.to_h))
 
             workdir = Dir.mktmpdir(nil, '/tmp')
